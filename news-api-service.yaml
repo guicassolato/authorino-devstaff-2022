@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: news-api
+  labels:
+    app: news-api
+spec:
+  selector:
+    app: news-api
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP

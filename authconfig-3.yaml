@@ -1,0 +1,60 @@
+apiVersion: authorino.kuadrant.io/v1beta1
+kind: AuthConfig
+metadata:
+  name: news-api
+spec:
+  hosts:
+  - api.news-agency.127.0.0.1.nip.io
+  identity:
+  - name: api-key-users
+    apiKey:
+      selector:
+        matchLabels:
+          app: news-api
+    credentials:
+      in: authorization_header
+      keySelector: API-KEY
+    extendedProperties:
+    - name: username
+      valueFrom:
+        authJSON: auth.identity.metadata.annotations.api\.news-agency/username
+    - name: name
+      valueFrom:
+        authJSON: auth.identity.metadata.annotations.api\.news-agency/name
+  - name: k8s-tokens
+    kubernetes:
+      audiences:
+      - https://kubernetes.default.svc.cluster.local
+    extendedProperties:
+    - name: username
+      valueFrom:
+        authJSON: auth.identity.sub
+    - name: name
+      valueFrom:
+        authJSON: auth.identity.serviceaccount.name
+  authorization:
+  - name: k8s-rbac
+    kubernetes:
+      user:
+        valueFrom:
+          authJSON: auth.identity.username
+      resourceAttributes:
+        namespace:
+          value: news-agency
+        group:
+          value: api.news-agency/v1
+        resource:
+          value: news
+        verb:
+          valueFrom:
+            authJSON: context.request.http.method.@case:lower
+  response:
+  - name: x-ext-auth-data
+    json:
+      properties:
+      - name: author
+        valueFrom:
+          authJSON: auth.identity.name
+      - name: user_id
+        valueFrom:
+          authJSON: auth.identity.username

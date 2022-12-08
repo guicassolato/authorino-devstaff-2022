@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: news-writer
+rules:
+- apiGroups: ["api.news-agency/v1"]
+  resources: ["news"]
+  verbs: ["get", "post"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: news-admin
+rules:
+- apiGroups: ["api.news-agency/v1"]
+  resources: ["news"]
+  verbs: ["get", "post", "delete"]

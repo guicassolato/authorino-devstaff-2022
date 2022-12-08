@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: news-api
+  labels:
+    app: news-api
+spec:
+  selector:
+    matchLabels:
+      app: news-api
+  template:
+    metadata:
+      labels:
+        app: news-api
+    spec:
+      containers:
+      - name: news-api
+        image: quay.io/kuadrant/authorino-examples:news-api
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PORT
+          value: "3000"
+        - name: REDIS_URL
+          value: redis://redis.news-agency.svc.cluster.local:6379
+  replicas: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: news-api
+  labels:
+    app: news-api
+spec:
+  selector:
+    app: news-api
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+  replicas: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  selector:
+    app: redis
+  ports:
+  - name: redis
+    port: 6379
+    protocol: TCP
